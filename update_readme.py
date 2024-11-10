@@ -1,4 +1,5 @@
 import csv
+import os
 import datetime
 
 NEW_IPS_FILE = 'new_surfshark_ips.csv'
