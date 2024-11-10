@@ -32,7 +32,7 @@ jobs:
         run: python surfshark.py
 
       - name: Run zmap
-        run: zmap -p 1443 -w surfshark_subnets.txt -r 128 -O csv --output-filter="success = 1" -o 'surfshark_ips_temp.csv'
+        run: zmap -p 1443 -w surfshark_subnet.txt -r 128 -O csv --output-filter="success = 1" -o 'surfshark_ips_temp.csv'
 
       - name: Clean up zmap output
         run: python surfshark_ip_cleanup.py
