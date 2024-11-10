@@ -2,7 +2,7 @@ name: Surfshark IP Updater
 
 on:
   schedule:
-    - cron: '* */12 * * *'  # Runs every 12 hours
+    - cron: '* */1 * * *'  # Runs every 12 hours
   workflow_dispatch:  # Allows manual trigger
 
 jobs:
