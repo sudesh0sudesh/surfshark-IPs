@@ -37,8 +37,6 @@ jobs:
       - name: Clean up zmap output
         run: python surfshark_ip_cleanup.py
 
-      - name: Update Readme
-        run: python update_readme.py
 
       - name: Configure Git
         run: |
