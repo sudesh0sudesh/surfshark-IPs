@@ -1,0 +1,63 @@
+name: Surfshark IP Updater
+
+on:
+  schedule:
+    - cron: '* */12 * * *'  # Runs every 12 hours
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  update-iocs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies and zmap
+        run: |
+          python -m pip install --upgrade pip
+          pip install dnspython
+          pip install csv
+          sudo apt install zmap
+
+      - name: Run surfshark subnets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python surfshark.py
+
+      - name: Run zmap
+        run: zmap -p 1443 -w surfshark_subnets.txt -r 128 -O csv --output-filter="success = 1" -o 'surfshark_ips_temp.csv'
+
+      - name: Clean up zmap output
+        run: python surfshark_ip_cleanup.py
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "sudesh@sudesh.com"
+          git config --local user.name "github-actions[bot]"
+
+      - name: Commit changes
+        run: |
+          git add surfshark_ips.csv new_surfshark_ips.csv
+          git diff-index --quiet HEAD || git commit -m "[AUTO] update IoCs $(date '+%Y-%m-%d %H:%M:%S')"
+          
+      - name: Push changes
+        id: push
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: Force push if previous push failed
+        if: failure()
+        run: |
+          git push --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
